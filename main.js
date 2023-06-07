@@ -7,6 +7,9 @@ let spaceball; // A SimpleRotator object that lets the user rotate the view by m
 let texture0, texture1;
 let video, background;
 let magData = {a:0, b:0};
+let sourceNode;
+let pannerNode;
+let filterNode;
 
 
 const texturePoint = { x: 100, y: 400 };
@@ -313,6 +316,54 @@ function initGL() {
   LoadTexture();
 
   gl.enable(gl.DEPTH_TEST);
+
+  const audioElement = document.getElementById("audioElement");
+  
+  audioElement.addEventListener('play', () => {
+    if (!audioContext) {
+      let AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContext();
+      listener = audioContext.listener;
+
+      listener.positionX.value = 0;
+      listener.positionY.value = 0;
+      listener.positionZ.value = -5;
+      listener.forwardX.value = 0;
+      listener.forwardY.value = 0;
+      listener.forwardZ.value = -1;
+
+      sourceNode = audioContext.createMediaElementSource(audioElement);
+      pannerNode = audioContext.createPanner();
+
+      // Connect audio nodes and set up spatial audio properties
+      // Create a BiquadFilterNode
+      filterNode = audioContext.createBiquadFilter();
+      filterNode.type = "highpass"; // Set filter type to highpass
+      filterNode.frequency.value = 7777; // Set cutoff frequency
+      filterNode.Q.value = 1; // Set resonance/Q value
+
+      sourceNode.connect(pannerNode);
+      pannerNode.connect(audioContext.destination);
+    }
+    audioElement.play();
+  });
+  
+}
+
+function toggleFilter() {
+  const checkbox = document.getElementById('filterCheckbox');
+  const filterEnabled = checkbox.checked;
+
+  if (filterEnabled) {
+    // Enable the filter
+    pannerNode.disconnect();
+    filterNode.connect(audioContext.destination);
+    pannerNode.connect(filterNode);
+  } else {
+    // Disable the filter
+    filterNode.disconnect();
+    pannerNode.connect(audioContext.destination)
+  }
 }
 
 /* Creates a program for use in the WebGL context gl, and returns the
