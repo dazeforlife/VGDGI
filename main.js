@@ -151,6 +151,9 @@ function draw() {
     [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
   );
   let matAccum0 = m4.multiply(rotateToPointZero, modelView);
+  if(calculateRotation() != null){
+    matAccum0 = m4.multiply(rotateToPointZero, calculateRotation() );
+  }
   let matAccum1 = m4.multiply(translateToPointZero, noRot);
   const modelviewInverse = m4.inverse(matAccum1, new Float32Array(16));
   const normalMatrix = m4.transpose(modelviewInverse, new Float32Array(16));
@@ -433,7 +436,8 @@ magSensor.start();
 //https://stackoverflow.com/questions/1311049/how-to-map-atan2-to-degrees-0-360
 function calculateRotation() {
   if (magData != null) {
-    return (( Math.atan2(magData.b, magData.a) * (180 / Math.PI) -90 ) + 360) % 360 - 90;
+    rotation = (( Math.atan2(magData.b, magData.a) * (180 / Math.PI) -90 ) + 360) % 360 - 90; 
+    return getRotationMatrix(null, null, rotation);
   }
 }
 
