@@ -10,6 +10,8 @@ let magData = {a:0, b:0};
 let sourceNode;
 let pannerNode;
 let filterNode;
+let sphere;
+let sphereTexture;
 
 
 const texturePoint = { x: 100, y: 400 };
@@ -309,9 +311,10 @@ function initGL() {
     [1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1]
   );
 
-  const sphereData = CreateSphereData();
   sphere = new Model('Sphere');
-  sphere.BufferData(sphereData.vertexList, sphereData.textureList);
+  const { verticesSphere, texturesSphere } = createSphereData();
+  sphere.BufferData(verticesSphere, texturesSphere);
+  // LoadSphereTexture();
 
   LoadTexture();
 
@@ -546,36 +549,48 @@ function getRotationMatrix( alpha, beta, gamma ) {
 
 };
 
-function CreateSphereData() {
-  let multiplier = 1;
-  let iSegments = 250;
-  let jSegments = 250;
+function createSphereData() {
+  let radius = 10;
 
   const vertexList = [];
   const textureList = [];
+  const splines = 20;
 
-  for (let i = 0; i <= iSegments; i++) {
-    const theta = i * Math.PI / iSegments;
-    const sinTheta = Math.sin(theta);
-    const cosTheta = Math.cos(theta);
+  const maxU = Math.PI;
+  const maxV = 2 * Math.PI;
+  const stepU = maxU / splines;
+  const stepV = maxV / splines;
 
-    for (let j = 0; j <= jSegments; j++) {
-      const phi = j * 2 * Math.PI / jSegments;
-      const sinPhi = Math.sin(phi);
-      const cosPhi = Math.cos(phi);
-      const x = multiplier * cosPhi * sinTheta;
-      const y = multiplier * cosTheta;
-      const z = multiplier * sinPhi * sinTheta;
+  const getU = (u) => {
+    return u / maxU;
+  };
 
-      vertexList.push(x, y, z)
+  const getV = (v) => {
+    return v / maxV;
+  };
 
-      const u = 1 - (j / jSegments);
-      const v = 1 - (i / iSegments);
-      textureList.push(u, v);
+  for (let u = 0; u <= maxU; u += stepU) {
+    for (let v = 0; v <= maxV; v += stepV) {
+      const x = radius * Math.sin(u) * Math.cos(v);
+      const y = radius * Math.sin(u) * Math.sin(v);
+      const z = radius * Math.cos(u);
+
+      vertexList.push(x, y, z);
+      textureList.push(getU(u), getV(v));
+
+      const xNext = radius * Math.sin(u + stepU) * Math.cos(v + stepV);
+      const yNext = radius * Math.sin(u + stepU) * Math.sin(v + stepV);
+      const zNext = radius * Math.cos(u + stepU);
+
+      vertexList.push(xNext, yNext, zNext);
+      textureList.push(getU(u + stepU), getV(v + stepV));
     }
   }
 
-  return { vertexList, textureList };
+  return {
+    verticesSphere: vertexList,
+    texturesSphere: textureList,
+  };
   
 }
 
@@ -610,4 +625,35 @@ function moveSphere(compassHeadingM){
   let translateToCenter2 = m4.translation(objectX, objectZ, 0); //-10
   rotationMatrix =  m4.multiply(translateToCenter2, rotationMatrix)
   return rotationMatrix;
+}
+
+function LoadSphereTexture() {
+  sphereTexture = gl.createTexture();
+  let image = new Image();
+  image.src = 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg?cs=srgb&dl=pexels-yurii-hlei-1545743.jpg&fm=jpg';
+  image.crossOrigin = 'anonymous';
+
+  image.onload = () => {
+    // Make the "texture object" be the active texture object. Only the
+    // active object can be modified or used. This also declares that the
+    // texture object will hold a texture of type gl.TEXTURE_2D. The type
+    // of the texture, gl.TEXTURE_2D, can't be changed after this initialization.
+    gl.bindTexture(gl.TEXTURE_2D, sphereTexture);
+
+    // Set parameters of the texture object. 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+
+    // Tell gl to flip the orientation of the image on the Y axis. Most
+    // images have their origin in the upper-left corner. WebGL expects
+    // the origin of an image to be in the lower-left corner.
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+
+    // Store in the image in the GPU's texture object
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+    draw();
+  };
 }
