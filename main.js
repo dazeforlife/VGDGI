@@ -417,10 +417,22 @@ function CreateWebCamTexture() {
 //https://developer.mozilla.org/en-US/docs/Web/API/Magnetometer
 let magSensor = new Magnetometer({ frequency: 60 });
 
+let magData = {a, b};
+
 sensor.addEventListener("reading", (e) => {
   console.log(`Magnetic field along the X-axis ${magSensor.x}`);
   console.log(`Magnetic field along the Y-axis ${magSensor.y}`);
   console.log(`Magnetic field along the Z-axis ${magSensor.z}`);
+  magData.a = magSensor.x;
+  magData.b = magSensor.y;
 });
 
 magSensor.start();
+
+//Calculate rotation
+//https://stackoverflow.com/questions/1311049/how-to-map-atan2-to-degrees-0-360
+function calculateRotation() {
+  if (magData != null) {
+    return (( Math.atan2(magData.b, magData.a) * (180 / Math.PI) -90 ) + 360) % 360 - 90;
+  }
+}
