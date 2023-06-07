@@ -6,6 +6,8 @@ let shProgram; // A shader program
 let spaceball; // A SimpleRotator object that lets the user rotate the view by mouse.
 let texture0, texture1;
 let video, background;
+let magData = {a:0, b:0};
+
 
 const texturePoint = { x: 100, y: 400 };
 
@@ -151,7 +153,7 @@ function draw() {
     [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
   );
   let matAccum0 = m4.multiply(rotateToPointZero, modelView);
-  if(calculateRotation() != null){
+  if(magData.a !== 0 && magData.b !== 0){
     matAccum0 = m4.multiply(rotateToPointZero, calculateRotation() );
   }
   let matAccum1 = m4.multiply(translateToPointZero, noRot);
@@ -419,8 +421,6 @@ function CreateWebCamTexture() {
 
 //https://developer.mozilla.org/en-US/docs/Web/API/Magnetometer
 let magSensor = new Magnetometer({ frequency: 60 });
-
-let magData = {a, b};
 
 sensor.addEventListener("reading", (e) => {
   console.log(`Magnetic field along the X-axis ${magSensor.x}`);
