@@ -338,8 +338,8 @@ function initGL() {
       // Connect audio nodes and set up spatial audio properties
       // Create a BiquadFilterNode
       filterNode = audioContext.createBiquadFilter();
-      filterNode.type = "highpass"; // Set filter type to highpass
-      filterNode.frequency.value = 7777; // Set cutoff frequency
+      filterNode.type = "bandpass"; // Set filter type to bandpass
+      filterNode.frequency.value = 350; // Set cutoff frequency
       filterNode.Q.value = 1; // Set resonance/Q value
 
       sourceNode.connect(pannerNode);
