@@ -209,7 +209,7 @@ function draw() {
   gl.uniform4fv(shProgram.iColor, [1, 1, 1, 1]);
   gl.uniform1f(shProgram.iL, 10)
   gl.uniform1i(shProgram.iTexture, 0);
-  gl.uniformMatrix4fv(shProgram.iModelViewMatrix, false, m4.multiply(projection, moveModelCGWRotationMatrix(calculateSurfaceRotation())));
+  gl.uniformMatrix4fv(shProgram.iModelViewMatrix, false, m4.multiply(projection, moveSphere(calculateRotation())));
   sphere.Draw();
   gl.clear(gl.DEPTH_BUFFER_BIT);
 }
@@ -525,4 +525,38 @@ function CreateSphereData() {
   }
 
   return { vertexList, textureList };
+  
+}
+
+function moveSphere(compassHeadingM){
+  const centerX = 0;
+  const centerY = 0;
+  const centerZ = 0;
+  
+  // Define the radius of circular motion
+  const radius = 3; // Adjust the radius as needed
+  
+  // Initialize the angle
+  let angle = compassHeadingM / 4;
+  
+  const objectX = centerX + Math.cos(angle) * radius;
+  const objectY = centerY;
+  const objectZ = centerZ + Math.sin(angle) * radius;
+  
+  if(pannerNode != undefined){
+  pannerNode.setPosition(objectX, objectY, objectZ); // Update the position of the audio source
+  pannerNode.setOrientation(0, 0, -1); // Set the orientation of the audio source
+  // pannerNode.distanceModel = 'linear'; // Change the distance model if needed
+  }
+
+  let rotationMatrix = new Float32Array([
+    Math.cos(angle), 0, Math.sin(angle), 0,
+    0, 1, 0, 0,
+    -Math.sin(angle), 0, Math.cos(angle), 0,
+    0, 0, 0, 1
+  ]);
+  
+  let translateToCenter2 = m4.translation(objectX, objectZ, 0); //-10
+  rotationMatrix =  m4.multiply(translateToCenter2, rotationMatrix)
+  return rotationMatrix;
 }
