@@ -436,7 +436,7 @@ magSensor.start();
 //https://stackoverflow.com/questions/1311049/how-to-map-atan2-to-degrees-0-360
 function calculateRotation() {
   if (magData != null) {
-    rotation = (( Math.atan2(magData.b, magData.a) * (180 / Math.PI) -90 ) + 360) % 360 - 90; 
+    let rotation = (( Math.atan2(magData.b, magData.a) * (180 / Math.PI) -90 ) + 360) % 360 - 90; 
     return getRotationMatrix(null, null, rotation);
   }
 }
