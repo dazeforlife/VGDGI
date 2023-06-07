@@ -204,6 +204,14 @@ function draw() {
   surface.Draw();
 
   gl.colorMask(true, true, true, true);
+
+  gl.bindTexture(gl.TEXTURE_2D, sphereTexture);
+  gl.uniform4fv(shProgram.iColor, [1, 1, 1, 1]);
+  gl.uniform1f(shProgram.iL, 10)
+  gl.uniform1i(shProgram.iTexture, 0);
+  gl.uniformMatrix4fv(shProgram.iModelViewMatrix, false, m4.multiply(projection, moveModelCGWRotationMatrix(calculateSurfaceRotation())));
+  sphere.Draw();
+  gl.clear(gl.DEPTH_BUFFER_BIT);
 }
 
 let a = 0;
@@ -297,6 +305,10 @@ function initGL() {
     [0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
     [1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1]
   );
+
+  const sphereData = CreateSphereData();
+  sphere = new Model('Sphere');
+  sphere.BufferData(sphereData.vertexList, sphereData.textureList);
 
   LoadTexture();
 
@@ -483,3 +495,34 @@ function getRotationMatrix( alpha, beta, gamma ) {
 
 };
 
+function CreateSphereData() {
+  let multiplier = 1;
+  let iSegments = 250;
+  let jSegments = 250;
+
+  const vertexList = [];
+  const textureList = [];
+
+  for (let i = 0; i <= iSegments; i++) {
+    const theta = i * Math.PI / iSegments;
+    const sinTheta = Math.sin(theta);
+    const cosTheta = Math.cos(theta);
+
+    for (let j = 0; j <= jSegments; j++) {
+      const phi = j * 2 * Math.PI / jSegments;
+      const sinPhi = Math.sin(phi);
+      const cosPhi = Math.cos(phi);
+      const x = multiplier * cosPhi * sinTheta;
+      const y = multiplier * cosTheta;
+      const z = multiplier * sinPhi * sinTheta;
+
+      vertexList.push(x, y, z)
+
+      const u = 1 - (j / jSegments);
+      const v = 1 - (i / iSegments);
+      textureList.push(u, v);
+    }
+  }
+
+  return { vertexList, textureList };
+}
