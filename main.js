@@ -413,3 +413,14 @@ function CreateWebCamTexture() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   return textureID;
 }
+
+//https://developer.mozilla.org/en-US/docs/Web/API/Magnetometer
+let magSensor = new Magnetometer({ frequency: 60 });
+
+sensor.addEventListener("reading", (e) => {
+  console.log(`Magnetic field along the X-axis ${magSensor.x}`);
+  console.log(`Magnetic field along the Y-axis ${magSensor.y}`);
+  console.log(`Magnetic field along the Z-axis ${magSensor.z}`);
+});
+
+magSensor.start();
