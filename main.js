@@ -578,7 +578,7 @@ const getCameraText = () => {
 
 const loadSphereTexture = () => {
   const image = new Image();
-  image.src = "https://www.the3rdsequence.com/texturedb/thumbnail/138/512/microbes+algae.jpg";
+  image.src = "https://www.the3rdsequence.com/texturedb/download/260/texture/png/1024/red+hot+fire+flames-1024x1024.png";
   image.crossOrigin = "anonymous";
 
   image.addEventListener("load", () => {
