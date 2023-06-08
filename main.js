@@ -507,7 +507,7 @@ function init() {
       audioFilter = audioContext.createBiquadFilter();
       audioPanner.panningModel = "HRTF";
       audioPanner.distanceModel = "linear";
-      audioFilter.type = "highpass";
+      audioFilter.type = "bandpass";
       audioFilter.frequency.value = cutoffFrequencyInput.value;
 
       audioSource.connect(audioPanner);
